@@ -21,7 +21,7 @@ import (
 
  */
 
-func main() {
+func main_old() {
 
 	var listen bool
 	flag.BoolVar(&listen, "listen", false, "act as a server")
@@ -33,15 +33,11 @@ func main() {
 	flag.IntVar(&c.Timeout, "timeout", 30, "timeout in seconds")
 	flag.IntVar(&c.Timeout, "t", 30, "timeout in seconds (shorthand)")
 	flag.Parse()
-	if listen {
-		speedtest.Server()
-	} else {
-		err := c.GetConfig()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Speedtest against %s with a %d seconds timeout\n", c.Server, c.Timeout)
-		//fmt.Printf("IP: %s\nLon:%s\nLat:%s\n", c.Client.IP, c.Client.Lon, c.Client.Lat)
-		c.TestServer()
+	err := c.GetConfig()
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf("Speedtest against %s with a %d seconds timeout\n", c.Server, c.Timeout)
+	//fmt.Printf("IP: %s\nLon:%s\nLat:%s\n", c.Client.IP, c.Client.Lon, c.Client.Lat)
+	c.TestServer()
 }

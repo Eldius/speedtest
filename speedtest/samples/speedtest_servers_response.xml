@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<settings>
+    <servers>
+        <server url="http://ookla.actionevoce.com.br:8080/speedtest/upload.php" lat="-22.9095" lon="-43.2001" name="Manaus" country="Brazil" cc="BR" sponsor="Action Fibra" id="22085" host="ookla.actionevoce.com.br:8080" />
+        <server url="http://test.afinet.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque de Caxias" country="Brazil" cc="BR" sponsor="AFINET" id="22448" host="test.afinet.com.br:8080" />
+        <server url="http://stmc.caxiasontelecom.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque De Caxias" country="Brazil" cc="BR" sponsor="Caxias Online" id="27842" host="stmc.caxiasontelecom.com.br:8080" />
+        <server url="http://rj1.vialinktelecom.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque de Caxias" country="Brazil" cc="BR" sponsor="Via Link Telecomunicacoes" id="9316" host="rj1.vialinktelecom.com.br:8080" />
+        <server url="http://speedtest.redebrtelecom.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque de Caxias" country="Brazil" cc="BR" sponsor="RedeBr Telecom" id="8998" host="speedtest.redebrtelecom.com.br:8080" />
+        <server url="http://rj1.stationnet.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque De Caxias" country="Brazil" cc="BR" sponsor="Station Net" id="30423" host="rj1.stationnet.com.br:8080" />
+        <server url="http://speedtest.cmbnet.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque De Caxias" country="Brazil" cc="BR" sponsor="CMB Network" id="30610" host="speedtest.cmbnet.com.br:8080" />
+        <server url="http://test.jc2000telecom.com.br:8080/speedtest/upload.php" lat="-22.7858" lon="-43.3119" name="Duque De Caxias" country="Brazil" cc="BR" sponsor="JC2000 telecom" id="30525" host="test.jc2000telecom.com.br:8080" />
+        <server url="http://ookla.falenet.com.br:8080/speedtest/upload.php" lat="-22.8098" lon="-43.4194" name="Nilópolis" country="Brazil" cc="BR" sponsor="Falenet" id="26318" host="ookla.falenet.com.br:8080" />
+        <server url="http://paiolnetspeedtest.com.br:8080/speedtest/upload.php" lat="-22.8098" lon="-43.4194" name="Nilopolis" country="Brazil" cc="BR" sponsor="PaiolNet" id="32447" host="paiolnetspeedtest.com.br:8080" />
+    </servers>
+</settings>
