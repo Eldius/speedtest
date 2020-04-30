@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/Eldius/speedtest/geolocation"
 )
 
 func getSampleFilePath(file string, t *testing.T) string {
@@ -67,7 +69,7 @@ func TestDistanceFrom(t *testing.T) {
 
 	serverList := s.Servers.ServerList
 
-	testLocation := NewLatLon(-22.9201, -43.3307)
+	testLocation := geolocation.NewLatLon(-22.9201, -43.3307)
 	for _, s := range serverList {
 		fmt.Println(s.ID, ") distance:", testLocation.DistanceFrom(s.GetLocation()))
 		switch s.ID {
