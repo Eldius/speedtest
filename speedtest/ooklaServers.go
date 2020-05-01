@@ -43,15 +43,15 @@ type TestServer struct {
 	Country string  `xml:"country,attr"`
 	Cc      string  `xml:"cc,attr"`
 	Sponsor string  `xml:"sponsor,attr"`
-	ID      string  `xml:"id,attr" gorm:"PRIMARY_KEY"`
+	ID      string  `xml:"id,attr" gorm:"type:varchar(100);PRIMARY_KEY"`
 	Host    string  `xml:"host,attr"`
 }
 
 /*
-NearestServer a workaround to save
+SelectedServer a workaround to save
 the nearest servers (for now)
 */
-type NearestServer struct {
+type SelectedServer struct {
 	ID     int64
 	server TestServer
 }
