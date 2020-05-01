@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -37,7 +37,7 @@ func getDbFile() string {
 
 func getDB() *gorm.DB {
 	databasePath := getDbFile()
-	fmt.Println("db file:", databasePath)
+	log.Println("db file:", databasePath)
 	if db, err := gorm.Open("sqlite3", databasePath); err != nil {
 		panic(err.Error())
 	} else {
@@ -54,9 +54,9 @@ func SaveServer(s speedtest.TestServer) {
 }
 
 /*
-SaveAll saves a list of entities
+SaveAllServers saves a list of servers
 */
-func SaveAll(servers []speedtest.TestServer) {
+func SaveAllServers(servers []speedtest.TestServer) {
 	db := getDB()
 	defer db.Close()
 	tx := db.Begin()
@@ -69,9 +69,9 @@ func SaveAll(servers []speedtest.TestServer) {
 
 func debug(o interface{}) {
 	if b, err := json.Marshal(o); err == nil {
-		fmt.Println("---")
-		fmt.Println(string(b))
-		fmt.Println("---")
+		log.Println("---")
+		log.Println(string(b))
+		log.Println("---")
 	} else {
 		panic(err.Error())
 	}

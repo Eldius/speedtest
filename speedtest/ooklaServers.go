@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/Eldius/speedtest/geolocation"
@@ -52,8 +53,9 @@ SelectedServer a workaround to save
 the nearest servers (for now)
 */
 type SelectedServer struct {
-	ID     int64
-	server TestServer
+	ID       string
+	Server   TestServer
+	Distance float64
 }
 
 /*
@@ -69,24 +71,31 @@ FindServers finds some servers from Speedtest
 */
 func (c *OoklaClient) FindServers() (servers []TestServer, err error) {
 	//servers = make([]ServerSpec, 0)
-	res, err := http.Get(OoklaServerListURL)
-	if err != nil {
-		return servers, err
+	w, err := c.fetchServersData()
+	if err == nil {
+		servers = w.Servers.ServerList
 	}
-	defer res.Body.Close()
-	return parseServerlistResponse(res.Body)
-	//return servers, nil
+	return
 }
 
-func parseServerlistResponse(r io.ReadCloser) (servers []TestServer, err error) {
-	var wrapper ServerListClientConfigWrapper
+/*
+FindServers finds some servers from Speedtest
+*/
+func (c *OoklaClient) fetchServersData() (w ServerListClientConfigWrapper, err error) {
+	//servers = make([]ServerSpec, 0)
+	res, err := http.Get(OoklaServerListURL)
+	defer res.Body.Close()
+	return parseServerlistResponse(res.Body)
+}
+
+func parseServerlistResponse(r io.ReadCloser) (wrapper ServerListClientConfigWrapper, err error) {
 	configxml, err := ioutil.ReadAll(r)
 	if err != nil {
-		return servers, err
+		return wrapper, err
 	}
 	err = xml.Unmarshal(configxml, &wrapper)
-	if err == nil {
-		servers = wrapper.Servers.ServerList
+	if err != nil {
+		log.Panic(err.Error())
 	}
 	return
 }
@@ -94,11 +103,46 @@ func parseServerlistResponse(r io.ReadCloser) (servers []TestServer, err error) 
 /*
 FindNearestServers find N nearest servers
 */
-func (c *OoklaClient) FindNearestServers(servers []TestServer, p *geolocation.LatLon, q int) []TestServer {
+func (c *OoklaClient) FindNearestServers(p *geolocation.LatLon, q int) []TestServer {
+	//c.FetchServers()
+	if w, err := c.fetchServersData(); err != nil {
+		panic(err.Error())
+	} else {
+		return w.FindNearestServers(p, q)
+	}
+}
+
+/*
+FindNearestServers find N nearest servers
+*/
+func (c *ServerListClientConfigWrapper) FindNearestServers(p *geolocation.LatLon, q int) []TestServer {
 	//c.FetchServers()
 	var sortByDistance = func(s1, s2 *TestServer) bool {
 		return s1.GetLocation().DistanceFrom(p) < s2.GetLocation().DistanceFrom(p)
 	}
-	SortServerBy(sortByDistance).SortServer(servers)
+	servers := c.Servers.ServerList
+	SortServerBy(sortByDistance).SortServer(c.Servers.ServerList)
 	return servers[:q]
+}
+
+/*
+FindFastestServersFromPing find N nearest servers
+*/
+func (c *OoklaClient) FindFastestServersFromPing(servers []TestServer, p *geolocation.LatLon, q int) TestServer {
+	var sortByDistance = func(s1, s2 *TestServer) bool {
+		return s1.GetLocation().DistanceFrom(p) < s2.GetLocation().DistanceFrom(p)
+	}
+	SortServerBy(sortByDistance).SortServer(servers)
+	return servers[0]
+}
+
+/*
+ToSelectedServer parse server to SelectedServer
+*/
+func (t *TestServer) ToSelectedServer(l geolocation.LatLon) SelectedServer {
+	return SelectedServer{
+		ID:       t.ID,
+		Server:   *t,
+		Distance: t.GetLocation().DistanceFrom(&l),
+	}
 }

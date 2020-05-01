@@ -1,8 +1,8 @@
 package speedtest
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -20,9 +20,9 @@ func getSampleFilePath(file string, t *testing.T) string {
 	if err != nil {
 		t.Errorf("Error trying to find current dir")
 	}
-	fmt.Println("current path", currPath)
+	log.Println("current path", currPath)
 	sampleFilePath := filepath.Join(currPath, file)
-	fmt.Println("config file", sampleFilePath)
+	log.Println("config file", sampleFilePath)
 
 	if _, err := os.Stat(sampleFilePath); err != nil {
 		t.Errorf("Config file doesn't exists:\n'%s'", sampleFilePath)
@@ -43,7 +43,8 @@ func openSampleFile(file string, t *testing.T) io.ReadCloser {
 func TestParseServerlistResponse(t *testing.T) {
 
 	f := openSampleFile("samples/speedtest_servers_response.xml", t)
-	serverList, err := parseServerlistResponse(f)
+	w, err := parseServerlistResponse(f)
+	serverList := w.Servers.ServerList
 	f.Close()
 	if err != nil {
 		t.Errorf("Failed to read struct from sample file: \n%s", err.Error())
@@ -66,7 +67,8 @@ func TestParseServerlistResponse(t *testing.T) {
 
 func TestDistanceFrom(t *testing.T) {
 	f := openSampleFile("samples/speedtest_servers_response.xml", t)
-	serverList, err := parseServerlistResponse(f)
+	w, err := parseServerlistResponse(f)
+	serverList := w.Servers.ServerList
 	f.Close()
 	if err != nil {
 		t.Errorf("Failed to read struct from sample file: \n%s", err.Error())
@@ -74,7 +76,7 @@ func TestDistanceFrom(t *testing.T) {
 
 	testLocation := geolocation.NewLatLon(-22.9201, -43.3307)
 	for _, s := range serverList {
-		fmt.Println(s.ID, ") distance:", testLocation.DistanceFrom(s.GetLocation()))
+		log.Println(s.ID, ") distance:", testLocation.DistanceFrom(s.GetLocation()))
 		switch s.ID {
 		case "22085":
 			expectedValue := 13.4429193589199
@@ -112,7 +114,8 @@ func TestDistanceFrom(t *testing.T) {
 
 func TestFindNearestServers(t *testing.T) {
 	f := openSampleFile("samples/speedtest_servers_response.xml", t)
-	serverList, err := parseServerlistResponse(f)
+	w, err := parseServerlistResponse(f)
+	serverList := w.Servers.ServerList
 	f.Close()
 	if err != nil {
 		t.Errorf("Failed to read struct from sample file: \n%s", err.Error())
@@ -120,21 +123,20 @@ func TestFindNearestServers(t *testing.T) {
 
 	testLocation := geolocation.NewLatLon(-22.9201, -43.3307)
 
-	c := OoklaClient{}
-	nearestServers := c.FindNearestServers(serverList, testLocation, 2)
+	nearestServers := w.FindNearestServers(testLocation, 2)
 
-	fmt.Println("---")
-	fmt.Println("ID, lat, lon, test lat, test lon, distance")
+	log.Println("---")
+	log.Println("ID, lat, lon, test lat, test lon, distance")
 	for _, s := range nearestServers {
-		fmt.Println(s.ID, ",", s.GetLocation().Lat, ",", s.GetLocation().Lon, ",", testLocation.Lat, ",", testLocation.Lon, ",", s.GetLocation().DistanceFrom(testLocation))
+		log.Println(s.ID, ",", s.GetLocation().Lat, ",", s.GetLocation().Lon, ",", testLocation.Lat, ",", testLocation.Lon, ",", s.GetLocation().DistanceFrom(testLocation))
 	}
-	fmt.Println("---")
-	fmt.Println("---")
-	fmt.Println("ID, lat, lon, test lat, test lon, distance")
+	log.Println("---")
+	log.Println("---")
+	log.Println("ID, lat, lon, test lat, test lon, distance")
 	for _, s := range serverList {
-		fmt.Println(s.ID, ",", s.GetLocation().Lat, ",", s.GetLocation().Lon, ",", testLocation.Lat, ",", testLocation.Lon, ",", s.GetLocation().DistanceFrom(testLocation))
+		log.Println(s.ID, ",", s.GetLocation().Lat, ",", s.GetLocation().Lon, ",", testLocation.Lat, ",", testLocation.Lon, ",", s.GetLocation().DistanceFrom(testLocation))
 	}
-	fmt.Println("---")
+	log.Println("---")
 
 	if len(nearestServers) != 2 {
 		t.Errorf("Must have 2 servers, but has %d", len(nearestServers))

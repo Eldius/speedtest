@@ -3,7 +3,6 @@ package main
 import (
 	//	"flag"
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/guifibages/speedtest/speedtest"
@@ -38,7 +37,7 @@ func mainOld() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Speedtest against %s with a %d seconds timeout\n", c.Server, c.Timeout)
-	//fmt.Printf("IP: %s\nLon:%s\nLat:%s\n", c.Client.IP, c.Client.Lon, c.Client.Lat)
+	log.Printf("Speedtest against %s with a %d seconds timeout\n", c.Server, c.Timeout)
+	//log.Printf("IP: %s\nLon:%s\nLat:%s\n", c.Client.IP, c.Client.Lon, c.Client.Lat)
 	c.TestServer()
 }

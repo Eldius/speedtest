@@ -4,8 +4,9 @@ Package cmd is where all commands will be.
 package cmd
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/Eldius/speedtest/geolocation"
 	"github.com/Eldius/speedtest/persistence"
 	"github.com/Eldius/speedtest/speedtest"
 	"github.com/spf13/cobra"
@@ -22,10 +23,22 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("fetch called")
-		c := speedtest.OoklaClient{}
-		if servers, err := c.FindServers(); err == nil {
-			persistence.SaveAll(servers)
+		log.Println("fetch called")
+		cs := speedtest.OoklaClient{}
+		cg := geolocation.Client{}
+		l, err := cg.FetchIPLocation()
+		if err != nil {
+			panic(err.Error())
+		}
+		if servers, err := cs.FindServers(); err == nil {
+			persistence.SaveAllServers(servers)
+			nearestServers := cs.FindNearestServers(l.GetLocation(), 15)
+			for i, s := range nearestServers {
+				log.Printf("%d) %s [%v]", i, s.Name, s.ToSelectedServer(*l.GetLocation()))
+			}
+			log.Printf("nearest servers: %v\n", nearestServers)
+		} else {
+			panic(err.Error())
 		}
 	},
 }

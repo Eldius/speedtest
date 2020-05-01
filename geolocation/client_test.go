@@ -1,8 +1,8 @@
 package geolocation
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,9 +13,9 @@ func getSampleFilePath(file string, t *testing.T) string {
 	if err != nil {
 		t.Errorf("Error trying to find current dir")
 	}
-	fmt.Println("current path", currPath)
+	log.Println("current path", currPath)
 	sampleFilePath := filepath.Join(currPath, file)
-	fmt.Println("config file", sampleFilePath)
+	log.Println("config file", sampleFilePath)
 
 	if _, err := os.Stat(sampleFilePath); err != nil {
 		t.Errorf("Config file doesn't exists:\n'%s'", sampleFilePath)

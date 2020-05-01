@@ -56,7 +56,7 @@ func (c *OoklaClient) GetConfig() error {
 
 	err = xml.Unmarshal(configxml, &c)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		log.Printf("error: %v", err)
 		return err
 	}
 	return nil
@@ -81,7 +81,7 @@ func (c *OoklaClient) Download() []*Result {
 			log.Fatal(err)
 		}
 		latency := time.Since(start).Seconds() * 1000
-		fmt.Printf("Downloading %.2f B file (%s) (Latency: %.2f ms) from %s\n", size, file, latency, c.Server)
+		log.Printf("Downloading %.2f B file (%s) (Latency: %.2f ms) from %s\n", size, file, latency, c.Server)
 		downTimer := make(chan int)
 		go func(res *http.Response) {
 			res.Write(ioutil.Discard)
@@ -93,12 +93,12 @@ func (c *OoklaClient) Download() []*Result {
 			result[i] = NewResult(size, lapse)
 			result[i].Latency = latency
 			result[i].File = url
-			//fmt.Printf("\tURL:%s (%s) %d bytes in %f seconds (%f bps)\n", url, res.Status, size, lapse, speed)
+			//log.Printf("\tURL:%s (%s) %d bytes in %f seconds (%f bps)\n", url, res.Status, size, lapse, speed)
 		case <-time.After(time.Duration(c.Timeout) * time.Second):
-			fmt.Printf("Timed out on %.2f MiB file\n", size/1024/1024)
+			log.Printf("Timed out on %.2f MiB file\n", size/1024/1024)
 			return result // Timed out
 		}
-		//			fmt.Printf("\tURL:%s (%s) %s\n\t%v\n", url, res.Status, size, res.Header)
+		//			log.Printf("\tURL:%s (%s) %s\n\t%v\n", url, res.Status, size, res.Header)
 	}
 	return result
 }
@@ -114,20 +114,20 @@ func (c *OoklaClient) Upload() {
 	data := string(buf)
 	extension := "php"
 	uploadurl := fmt.Sprintf("http://%s/speedtest/upload.%s", c.Server, extension)
-	fmt.Println("Uploading to", uploadurl, "data", len(data))
+	log.Println("Uploading to", uploadurl, "data", len(data))
 	v := url.Values{}
 	v.Add("content1", data)
 	resp, err := http.PostForm(uploadurl,
 		v)
 	if err != nil {
-		fmt.Println("Error posting", err)
+		log.Println("Error posting", err)
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading body", err)
+		log.Println("Error reading body", err)
 	}
-	fmt.Println("Response:", string(body))
+	log.Println("Response:", string(body))
 }
 
 /*
@@ -164,7 +164,7 @@ func (c *OoklaClient) TestServer() {
 	medlat := totallat / float64(j)
 	medspeed := (totalbytes * 8) / totaltime
 
-	fmt.Printf("Summary: %.2f MiB transferred in %.2f seconds from %s\n", totalbytes/1024/1024, totaltime, c.Server)
-	fmt.Printf("  Latency: min: %.2f ms med: %.2f ms max: %.2f ms\n", minlat, medlat, maxlat)
-	fmt.Printf("  Speed: min: %.2f Mbps med: %.2f Mbps max: %.2f Mbps\n", minspeed/1000000, medspeed/1000000, maxspeed/1000000)
+	log.Printf("Summary: %.2f MiB transferred in %.2f seconds from %s\n", totalbytes/1024/1024, totaltime, c.Server)
+	log.Printf("  Latency: min: %.2f ms med: %.2f ms max: %.2f ms\n", minlat, medlat, maxlat)
+	log.Printf("  Speed: min: %.2f Mbps med: %.2f Mbps max: %.2f Mbps\n", minspeed/1000000, medspeed/1000000, maxspeed/1000000)
 }
