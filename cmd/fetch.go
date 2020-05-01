@@ -6,6 +6,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/Eldius/speedtest/persistence"
+	"github.com/Eldius/speedtest/speedtest"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +23,10 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("fetch called")
+		c := speedtest.OoklaClient{}
+		if servers, err := c.FindServers(); err == nil {
+			persistence.SaveAll(servers)
+		}
 	},
 }
 
