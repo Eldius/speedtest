@@ -47,7 +47,7 @@ func (t *TestServer) GetLocation() *geolocation.LatLon {
 /*
 FindServers finds some servers from Speedtest
 */
-func (c *OoklaClient) FindServers() (servers ServerListClientConfigWrapper, err error) {
+func (c *OoklaClient) FindServers() (servers []TestServer, err error) {
 	//servers = make([]ServerSpec, 0)
 	res, err := http.Get(OoklaServerListURL)
 	if err != nil {
@@ -58,12 +58,16 @@ func (c *OoklaClient) FindServers() (servers ServerListClientConfigWrapper, err 
 	//return servers, nil
 }
 
-func parseServerlistResponse(r io.ReadCloser) (servers ServerListClientConfigWrapper, err error) {
+func parseServerlistResponse(r io.ReadCloser) (servers []TestServer, err error) {
+	var wrapper ServerListClientConfigWrapper
 	configxml, err := ioutil.ReadAll(r)
 	if err != nil {
 		return servers, err
 	}
-	err = xml.Unmarshal(configxml, &servers)
+	err = xml.Unmarshal(configxml, &wrapper)
+	if err == nil {
+		servers = wrapper.Servers.ServerList
+	}
 	return
 }
 

@@ -38,18 +38,18 @@ func openSampleFile(file string, t *testing.T) io.ReadCloser {
 func TestParseServerlistResponse(t *testing.T) {
 
 	f := openSampleFile("samples/speedtest_servers_response.xml", t)
-	s, err := parseServerlistResponse(f)
+	serverList, err := parseServerlistResponse(f)
 	f.Close()
 	if err != nil {
 		t.Errorf("Failed to read struct from sample file: \n%s", err.Error())
 	}
 
-	if len(s.Servers.ServerList) != 10 {
-		t.Errorf("We must have 2 servers, but we have %d", len(s.Servers.ServerList))
+	if len(serverList) != 10 {
+		t.Errorf("We must have 2 servers, but we have %d", len(serverList))
 	}
 
-	s0 := s.Servers.ServerList[0]
-	s1 := s.Servers.ServerList[1]
+	s0 := serverList[0]
+	s1 := serverList[1]
 
 	if (s0.ID != "22085") && s1.ID != "22085" {
 		t.Errorf("We must have at leas one server with ID 22085, but we have %s and %s", s0.ID, s1.ID)
@@ -61,13 +61,11 @@ func TestParseServerlistResponse(t *testing.T) {
 
 func TestDistanceFrom(t *testing.T) {
 	f := openSampleFile("samples/speedtest_servers_response.xml", t)
-	s, err := parseServerlistResponse(f)
+	serverList, err := parseServerlistResponse(f)
 	f.Close()
 	if err != nil {
 		t.Errorf("Failed to read struct from sample file: \n%s", err.Error())
 	}
-
-	serverList := s.Servers.ServerList
 
 	testLocation := geolocation.NewLatLon(-22.9201, -43.3307)
 	for _, s := range serverList {
