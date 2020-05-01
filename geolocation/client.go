@@ -9,14 +9,21 @@ import (
 )
 
 const (
+	// IPGeolocationAPIEndpoint is the API endpoint
 	IPGeolocationAPIEndpoint = "http://www.geoplugin.net/json.gp"
 )
 
+/*
+LatLon represents a point in earth globe
+*/
 type LatLon struct {
 	Lat float64
 	Lon float64
 }
 
+/*
+IPGeolocationResponse represents the API response
+*/
 type IPGeolocationResponse struct {
 	GeopluginRequest                string  `json:"geoplugin_request"`
 	GeopluginStatus                 int     `json:"geoplugin_status"`
@@ -44,6 +51,9 @@ type IPGeolocationResponse struct {
 	GeopluginCurrencyConverter      float64 `json:"geoplugin_currencyConverter"`
 }
 
+/*
+NewLatLon creates a new LatLon object
+*/
 func NewLatLon(lat, lon float64) (p *LatLon) {
 	p = &LatLon{
 		Lat: lat,
@@ -53,14 +63,26 @@ func NewLatLon(lat, lon float64) (p *LatLon) {
 	return
 }
 
-func (l *LatLon) DistanceFrom(from *LatLon) (hypotenuse float64) {
-	side1 := ((l.Lat - from.Lat) * (l.Lat - from.Lat))
-	side2 := ((l.Lon - from.Lon) * (l.Lon - from.Lon))
-	hypotenuse = math.Sqrt(side1 + side2)
+/*
+DistanceFrom calculates the distance in km
+based on the Haversine formula
+https://en.wikipedia.org/wiki/Haversine_formula
+*/
+func (l *LatLon) DistanceFrom(from *LatLon) float64 {
+	earthRadius := 6378.137
+	dLat := l.Lat*math.Pi/180 - from.Lat*math.Pi/180
+	dLon := l.Lon*math.Pi/180 - from.Lon*math.Pi/180
+	var a = math.Sin(dLat/2)*math.Sin(dLat/2) +
+		math.Cos(l.Lat*math.Pi/180)*math.Cos(from.Lat*math.Pi/180)*
+			math.Sin(dLon/2)*math.Sin(dLon/2)
 
-	return
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	return earthRadius * c
 }
 
+/*
+DistanceFromFloat calculates the distance between points
+*/
 func (l *LatLon) DistanceFromFloat(lat float64, lon float64) float64 {
 	return l.DistanceFrom(NewLatLon(lat, lon))
 }
@@ -84,10 +106,16 @@ func (r *IPGeolocationResponse) GetLocation() *LatLon {
 	return l
 }
 
-type GeolocationClient struct {
+/*
+Client is the client to fetch location from API
+*/
+type Client struct {
 }
 
-func (c *GeolocationClient) FetchIPLocation() (response IPGeolocationResponse, err error) {
+/*
+FetchIPLocation query APi for location
+*/
+func (c *Client) FetchIPLocation() (response IPGeolocationResponse, err error) {
 	res, err := http.Get(IPGeolocationAPIEndpoint)
 	if err != nil {
 		return response, err

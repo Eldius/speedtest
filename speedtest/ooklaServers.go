@@ -74,7 +74,11 @@ func parseServerlistResponse(r io.ReadCloser) (servers []TestServer, err error) 
 /*
 FindNearestServers find N nearest servers
 */
-func (c *OoklaClient) FindNearestServers(q int) (servers []TestServer, err error) {
+func (c *OoklaClient) FindNearestServers(servers []TestServer, p *geolocation.LatLon, q int) []TestServer {
 	//c.FetchServers()
-	return nil, nil
+	var sortByDistance = func(s1, s2 *TestServer) bool {
+		return s1.GetLocation().DistanceFrom(p) < s2.GetLocation().DistanceFrom(p)
+	}
+	SortServerBy(sortByDistance).SortServer(servers)
+	return servers[:q]
 }

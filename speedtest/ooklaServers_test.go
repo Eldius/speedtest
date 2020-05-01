@@ -3,11 +3,16 @@ package speedtest
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/Eldius/speedtest/geolocation"
+)
+
+const (
+	distanceTestTolerance = 0.000000001
 )
 
 func getSampleFilePath(file string, t *testing.T) string {
@@ -72,65 +77,80 @@ func TestDistanceFrom(t *testing.T) {
 		fmt.Println(s.ID, ") distance:", testLocation.DistanceFrom(s.GetLocation()))
 		switch s.ID {
 		case "22085":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.13102946233576745
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 13.4429193589199
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "22448":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "27842":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "9316":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "8998":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "30423":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "30610":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "30525":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.1356094760700771
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.0740816039992
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "26318":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.14154073618573917
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.2819887959137
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		case "32447":
-			distance := testLocation.DistanceFrom(s.GetLocation())
-			expectedValue := 0.14154073618573917
-			if distance != expectedValue {
-				t.Errorf("Failed to validate result for ID: %s (%f != %f)", s.ID, expectedValue, distance)
-			}
+			expectedValue := 15.2819887959137
+			validateDistanceCalc(s, testLocation, expectedValue, t)
 		}
+	}
+}
+
+func TestFindNearestServers(t *testing.T) {
+	f := openSampleFile("samples/speedtest_servers_response.xml", t)
+	serverList, err := parseServerlistResponse(f)
+	f.Close()
+	if err != nil {
+		t.Errorf("Failed to read struct from sample file: \n%s", err.Error())
+	}
+
+	testLocation := geolocation.NewLatLon(-22.9201, -43.3307)
+
+	c := OoklaClient{}
+	nearestServers := c.FindNearestServers(serverList, testLocation, 2)
+
+	fmt.Println("---")
+	fmt.Println("ID, lat, lon, test lat, test lon, distance")
+	for _, s := range nearestServers {
+		fmt.Println(s.ID, ",", s.GetLocation().Lat, ",", s.GetLocation().Lon, ",", testLocation.Lat, ",", testLocation.Lon, ",", s.GetLocation().DistanceFrom(testLocation))
+	}
+	fmt.Println("---")
+	fmt.Println("---")
+	fmt.Println("ID, lat, lon, test lat, test lon, distance")
+	for _, s := range serverList {
+		fmt.Println(s.ID, ",", s.GetLocation().Lat, ",", s.GetLocation().Lon, ",", testLocation.Lat, ",", testLocation.Lon, ",", s.GetLocation().DistanceFrom(testLocation))
+	}
+	fmt.Println("---")
+
+	if len(nearestServers) != 2 {
+		t.Errorf("Must have 2 servers, but has %d", len(nearestServers))
+	}
+
+	if nearestServers[0].ID != "22085" {
+		t.Errorf("Nearest server must be ID 22085, but is %s", nearestServers[0].ID)
+	}
+	if nearestServers[1].ID != "22448" {
+		t.Errorf("Nearest server must be ID 22448, but is %s", nearestServers[1].ID)
+	}
+}
+
+func validateDistanceCalc(s TestServer, location *geolocation.LatLon, expectedDistance float64, t *testing.T) {
+	distance := s.GetLocation().DistanceFrom(location)
+	if math.Abs(expectedDistance-distance) > distanceTestTolerance {
+		t.Errorf("Failed to validate result for ID: %s (%f != %f/%f)", s.ID, expectedDistance, distance, math.Abs(expectedDistance-distance))
 	}
 }
