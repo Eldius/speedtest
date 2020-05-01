@@ -40,7 +40,7 @@ type TestServer struct {
 	Host    string  `xml:"host,attr"`
 }
 
-func (t *TestServer) GetLocation() geolocation.LatLon {
+func (t *TestServer) GetLocation() *geolocation.LatLon {
 	return geolocation.NewLatLon(t.Lat, t.Lon)
 }
 

@@ -1,6 +1,16 @@
 package geolocation
 
-import "math"
+import (
+	"encoding/json"
+	"io"
+	"math"
+	"net/http"
+	"strconv"
+)
+
+const (
+	IPGeolocationAPIEndpoint = "http://www.geoplugin.net/json.gp"
+)
 
 type LatLon struct {
 	Lat float64
@@ -24,8 +34,8 @@ type IPGeolocationResponse struct {
 	GeopluginEuVATrate              bool    `json:"geoplugin_euVATrate"`
 	GeopluginContinentCode          string  `json:"geoplugin_continentCode"`
 	GeopluginContinentName          string  `json:"geoplugin_continentName"`
-	GeopluginLatitude               float64 `json:"geoplugin_latitude"`
-	GeopluginLongitude              float64 `json:"geoplugin_longitude"`
+	GeopluginLatitude               string  `json:"geoplugin_latitude"`
+	GeopluginLongitude              string  `json:"geoplugin_longitude"`
 	GeopluginLocationAccuracyRadius string  `json:"geoplugin_locationAccuracyRadius"`
 	GeopluginTimezone               string  `json:"geoplugin_timezone"`
 	GeopluginCurrencyCode           string  `json:"geoplugin_currencyCode"`
@@ -34,14 +44,16 @@ type IPGeolocationResponse struct {
 	GeopluginCurrencyConverter      float64 `json:"geoplugin_currencyConverter"`
 }
 
-func NewLatLon(lat, lon float64) (p LatLon) {
-	p.Lat = lat
-	p.Lon = lon
+func NewLatLon(lat, lon float64) (p *LatLon) {
+	p = &LatLon{
+		Lat: lat,
+		Lon: lon,
+	}
 
 	return
 }
 
-func (l *LatLon) DistanceFrom(from LatLon) (hypotenuse float64) {
+func (l *LatLon) DistanceFrom(from *LatLon) (hypotenuse float64) {
 	side1 := ((l.Lat - from.Lat) * (l.Lat - from.Lat))
 	side2 := ((l.Lon - from.Lon) * (l.Lon - from.Lon))
 	hypotenuse = math.Sqrt(side1 + side2)
@@ -49,13 +61,46 @@ func (l *LatLon) DistanceFrom(from LatLon) (hypotenuse float64) {
 	return
 }
 
-func (l *LatLon) DistanceFromFloat(lat, lon float64) float64 {
+func (l *LatLon) DistanceFromFloat(lat float64, lon float64) float64 {
 	return l.DistanceFrom(NewLatLon(lat, lon))
 }
 
 /*
 GetLocation gets the location from response
 */
-func (r *IPGeolocationResponse) GetLocation() LatLon {
-	return NewLatLon(r.GeopluginLatitude, r.GeopluginLongitude)
+func (r *IPGeolocationResponse) GetLocation() *LatLon {
+	lat, err := strconv.ParseFloat(r.GeopluginLatitude, 64)
+	if err != nil {
+		panic(err.Error())
+	}
+	lon, err := strconv.ParseFloat(r.GeopluginLongitude, 64)
+	if err != nil {
+		panic(err.Error())
+	}
+	l := NewLatLon(lat, lon)
+	if err != nil {
+		panic(err.Error())
+	}
+	return l
+}
+
+type GeolocationClient struct {
+}
+
+func (c *GeolocationClient) FetchIPLocation() (response IPGeolocationResponse, err error) {
+	res, err := http.Get(IPGeolocationAPIEndpoint)
+	if err != nil {
+		return response, err
+	}
+	defer res.Body.Close()
+
+	response, err = parseLocationResponse(res.Body)
+
+	return
+}
+
+func parseLocationResponse(r io.ReadCloser) (response IPGeolocationResponse, err error) {
+	err = json.NewDecoder(r).Decode(&response)
+
+	return
 }
