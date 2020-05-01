@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	// OoklaServerListURL is the server list URL
 	OoklaServerListURL = "https://c.speedtest.net/speedtest-servers-static.php"
 )
 
@@ -22,11 +23,17 @@ type ServerListClientConfigWrapper struct {
 	Servers ServersList `xml:"servers"`
 }
 
+/*
+ServersList is a wrapper for the servers list
+*/
 type ServersList struct {
 	Text       string       `xml:",chardata"`
 	ServerList []TestServer `xml:"server"`
 }
 
+/*
+TestServer is the test server definition
+*/
 type TestServer struct {
 	Text    string  `xml:",chardata"`
 	URL     string  `xml:"url,attr"`
@@ -40,6 +47,10 @@ type TestServer struct {
 	Host    string  `xml:"host,attr"`
 }
 
+/*
+GetLocation returns the geolocation coordinates
+of server (lat, lon)
+*/
 func (t *TestServer) GetLocation() *geolocation.LatLon {
 	return geolocation.NewLatLon(t.Lat, t.Lon)
 }

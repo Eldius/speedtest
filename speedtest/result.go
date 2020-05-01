@@ -1,5 +1,8 @@
 package speedtest
 
+/*
+Result is the speed test result
+*/
 type Result struct {
 	Speed    float64
 	Seconds  float64
@@ -10,11 +13,9 @@ type Result struct {
 	Receiver string // Address of the receiver part
 }
 
-type Test struct {
-	Size      float64
-	Direction string
-}
-
+/*
+NewResult creates a new result instance
+*/
 func NewResult(size, seconds float64) *Result {
 	/*
 	* Gets a size in bytes and a time in seconds and returns

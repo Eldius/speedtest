@@ -4,8 +4,9 @@ import (
 	//	"flag"
 	"flag"
 	"fmt"
-	"github.com/guifibages/speedtest/speedtest"
 	"log"
+
+	"github.com/guifibages/speedtest/speedtest"
 )
 
 /*
@@ -21,7 +22,7 @@ import (
 
  */
 
-func main_old() {
+func mainOld() {
 
 	var listen bool
 	flag.BoolVar(&listen, "listen", false, "act as a server")

@@ -14,11 +14,15 @@ import (
 )
 
 const (
+	// OoklaClientConfigURL Speedtest config URL
 	OoklaClientConfigURL = "http://www.speedtest.net/speedtest-config.php"
 )
 
 //	PrefServer      = "http://speedtest.bcn.adamo.es/speedtest"
 
+/*
+OoklaClient is the test client itself
+*/
 type OoklaClient struct {
 	XMLName xml.Name          `xml:"settings"`
 	Client  OoklaClientConfig `xml:"client"`
@@ -26,12 +30,19 @@ type OoklaClient struct {
 	Timeout int
 }
 
+/*
+OoklaClientConfig is the client configuration
+for speed test
+*/
 type OoklaClientConfig struct {
 	IP  string `xml:"ip,attr"`
 	Lat string `xml:"lat,attr"`
 	Lon string `xml:"lon,attr"`
 }
 
+/*
+GetConfig fetchs the configuration from server
+*/
 func (c *OoklaClient) GetConfig() error {
 	res, err := http.Get(OoklaClientConfigURL)
 	if err != nil {
@@ -51,6 +62,9 @@ func (c *OoklaClient) GetConfig() error {
 	return nil
 }
 
+/*
+Download executes the download test
+*/
 func (c *OoklaClient) Download() []*Result {
 	sizes := [10]int{350, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000}
 	result := make([]*Result, 10)
@@ -89,6 +103,9 @@ func (c *OoklaClient) Download() []*Result {
 	return result
 }
 
+/*
+Upload executes the upload test
+*/
 func (c *OoklaClient) Upload() {
 
 	buf := make([]byte, (1024))
@@ -113,6 +130,9 @@ func (c *OoklaClient) Upload() {
 	fmt.Println("Response:", string(body))
 }
 
+/*
+TestServer executes the tests
+*/
 func (c *OoklaClient) TestServer() {
 	c.Upload()
 	res := c.Download()
@@ -140,7 +160,7 @@ func (c *OoklaClient) TestServer() {
 		totalbytes += v.Size
 		totaltime += v.Seconds
 	}
-	j += 1
+	j++
 	medlat := totallat / float64(j)
 	medspeed := (totalbytes * 8) / totaltime
 
